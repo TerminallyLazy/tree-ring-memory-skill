@@ -1,8 +1,8 @@
 ---
 name: tree-ring-memory
 description: Guides AI agents in using Tree Ring Memory for durable recall, project decisions, user preferences, warnings, future seeds, privacy-safe memory capture, and lifecycle-aware forgetting.
-version: 0.11.0
-tags: ["memory", "agents", "recall", "privacy", "projects", "dox", "revolve", "skills", "cli"]
+version: 0.13.0
+tags: ["memory", "agents", "recall", "privacy", "projects", "dox", "revolve", "skills", "cli", "multi-agent", "fan-out", "fan-in", "idempotency", "coordination"]
 triggers:
   - "remember this"
   - "recall what we decided"
@@ -14,6 +14,10 @@ triggers:
   - "sync DOX"
   - "sync Revolve"
   - "evidence loop"
+  - "multi-agent memory"
+  - "fan-out memory"
+  - "fan-in memory"
+  - "coordinated memory"
 ---
 
 # Tree Ring Memory
@@ -74,6 +78,8 @@ tree-ring integrations scan --source-root .
 Run adapter commands with `--dry-run` first. Sync only concise, source-linked
 summaries; never treat imported memory as more authoritative than the source
 `AGENTS.md`, Revolve record, evaluation, PR, issue, or test artifact.
+In a Coordinated store, persisting an adapter result requires the coordinator
+capability; dry-run discovery does not.
 
 Use the exact CLI commands exposed by the local install:
 
@@ -99,6 +105,31 @@ Evidence outcome mapping:
 - `rejected`: scar for reusable failed or rolled-back approaches
 - `deferred`: seed for promising unresolved options
 - `observed`: outer-ring evaluation result
+
+## Memory Quality Gates
+
+Use these gates before relying on or writing memory.
+
+Recall gates:
+
+- Before substantial project work, recall project constraints, scars, user preferences, and unresolved seeds.
+- Before risky changes, recall warnings and evidence-linked prior failures.
+- Before repeating a workflow, recall prior errors and accepted procedures.
+- Before closeout, recall recent decisions so memory updates do not contradict already-stored lessons.
+
+Trust gates:
+
+- Prefer source-linked, non-superseded, high-confidence memories.
+- Treat heartwood as durable only when source evidence or user confirmation supports it.
+- Re-read source files, tests, explicit user instructions, DOX contracts, or Revolve evidence when memory conflicts with current sources.
+- Do not treat sensitive or hidden-by-default memory as ordinary recall context.
+
+Write gates:
+
+- Remember only durable decisions, validated lessons, reusable warnings, corrections, future seeds, and evidence-backed outcomes.
+- Reject transient planning chatter, duplicate wording, tool noise, and unsupported claims.
+- Require evidence refs for promoted or rejected evaluated outcomes.
+- Require user confirmation before creating or promoting broad cross-project heartwood.
 
 ## Ring Selection
 
@@ -150,7 +181,9 @@ If a useful memory contains sensitive material, store a redacted summary with en
 Set project and scope deliberately:
 
 - use project scope for repo-specific rules, decisions, warnings, and lessons
-- use agent scope for agent-profile behavior
+- use agent scope for agent-partitioned behavior and always set `agent_profile`
+- use workflow scope for one coordinated fan-out/fan-in and always set `workflow_id`
+- use session scope for one execution attempt and always set `session_id`
 - use global scope only for durable user preferences or cross-project guidance
 - include source references such as file paths, issue ids, PR ids, run ids, or docs paths
 - use `tree-ring evidence ... --evidence-ref <ref>` for evaluated outcomes
@@ -163,6 +196,122 @@ Memory does not replace source documents. If a repo has `AGENTS.md`, project doc
 When DOX or Revolve source records change, re-run the matching sync adapter with
 `--dry-run`, inspect the generated memories, then run the write command only
 when the summaries are useful and source-linked.
+
+## Multi-Agent Coordination
+
+For workers sharing one local Tree Ring root, give every write explicit
+coordination metadata:
+
+```bash
+tree-ring --root .tree-ring remember "Worker validated the storage boundary." \
+  --event-type lesson \
+  --scope agent \
+  --project example-service \
+  --agent-profile worker-storage \
+  --workflow-id release-readiness \
+  --session-id attempt-1 \
+  --operation-id validate-storage-v1 \
+  --source-ref runs/release-readiness/worker-storage.json
+```
+
+Use a unique `agent_profile` per worker, one shared `workflow_id` for the
+fan-out/fan-in, one `session_id` for each genuine execution attempt, and a stable
+unique `operation_id` for each logical write. An exact retry reuses both the
+original session ID and operation ID; changing only the session is a conflicting
+reuse. Start a new session and use new operation IDs only for a genuinely new
+attempt. Exact retries with the same operation metadata and payload return the
+original memory. Reusing that operation key for a different payload fails
+closed. Replacing a stored memory keeps its old operation namespace claimed.
+Redaction also tombstones the memory ID; only an explicit hard delete releases
+those claims.
+
+At fan-in, recall the shared workflow and session without an agent-profile
+filter, inspect the source refs, then write a source-linked workflow or project
+summary:
+
+```bash
+tree-ring --root .tree-ring recall "release readiness" \
+  --project example-service \
+  --workflow-id release-readiness \
+  --session-id attempt-1 \
+  --scope agent
+```
+
+`TREE_RING_AGENT_PROFILE`, `TREE_RING_WORKFLOW_ID`, and
+`TREE_RING_SESSION_ID` provide the same defaults as their CLI flags. Do not
+leave an agent-profile environment filter set when the coordinator intends to
+recall every worker.
+
+This shared-root pattern is for concurrent processes on one host using a local
+filesystem. It is not a distributed lock service and does not claim safe
+cross-host or NFS operation. Scope and identity fields remain routing metadata,
+not a read ACL; a same-user coordinator can recall across profiles. Use
+per-host stores plus an explicit, evidence-preserving fan-in process when work
+spans hosts.
+
+## Coordinated Write Policy
+
+Stores default to backward-compatible Open mode. For a shared root where only a
+designated coordinator should publish or mutate shared memory, enable the
+optional Coordinated policy:
+
+```bash
+tree-ring --root .tree-ring policy enable --coordinator release-coordinator
+export TREE_RING_COORDINATOR_TOKEN='<one-time capability printed by enable>'
+tree-ring --root .tree-ring policy status
+tree-ring --root .tree-ring policy audit --limit 100
+```
+
+Enable prints the capability once. Put it only in
+`TREE_RING_COORDINATOR_TOKEN`; never pass it as a CLI flag or place it in a
+memory, log, source ref, transcript, or committed file. Tree Ring stores only a
+hash. `policy status` and `policy audit` are read-only and do not reveal the
+capability. Inject it only into coordinator processes, and launch every ordinary
+worker with `TREE_RING_COORDINATOR_TOKEN` unset so fan-out does not inherit
+coordinator authority.
+
+In Coordinated mode, an ordinary worker may only create non-heartwood
+`scope=agent` memory whose `agent_profile` matches its write context. Supply the
+same identity with `--agent-profile <worker>` or
+`TREE_RING_AGENT_PROFILE=<worker>`. A coordinator capability is required for:
+
+- project, global, workflow, session, or other shared/non-agent writes
+- heartwood creation or promotion
+- JSONL import and persisted DOX/Revolve sync
+- persisted consolidation
+- ring changes and supersede/delete/redact lifecycle operations
+- maintenance with apply or repair flags
+
+Recall, export, policy status/audit, adapter dry-runs, consolidation dry-runs,
+and report-only maintenance remain read-only. In the TUI, start with
+`--agent-profile <worker>` (or `TREE_RING_AGENT_PROFILE`) so `/remember`
+defaults to agent scope. TUI promote/scar/seed, supersede, forget/redact, and
+persisted consolidation actions require `TREE_RING_COORDINATOR_TOKEN`.
+
+Rotate the capability while the current one is exported, then immediately
+replace the environment value with the newly printed capability:
+
+```bash
+tree-ring --root .tree-ring policy rotate --coordinator release-coordinator-next
+export TREE_RING_COORDINATOR_TOKEN='<new one-time capability>'
+tree-ring --root .tree-ring policy disable
+unset TREE_RING_COORDINATOR_TOKEN
+```
+
+Rotation invalidates the old capability. Disabling returns the store to Open
+mode and also requires the current capability.
+
+This is operational write authorization enforced by official Rust/CLI store
+paths. It is not a read ACL, an operating-system security boundary, or
+protection from an adversary who controls the local database files or process
+environment.
+
+Before opening an existing store with v0.13/schema v3, stop every Tree Ring
+process, checkpoint and back up the database, and upgrade every CLI, plugin, and
+bundled worker. Do not reopen the upgraded root with v0.12: schema v3 fences
+memory inserts, updates, and deletes from old writers, and all mixed-version
+operation is unsupported. Roll back only by stopping all processes and
+restoring the pre-upgrade backup.
 
 ## Agent-Mediated Updates
 
@@ -188,6 +337,12 @@ If memory is wrong, private, stale, or superseded:
 - delete it when it should not be retained
 - supersede it when a newer decision replaces it
 - prefer explicit reasons for every forget operation
+
+In Coordinated mode these lifecycle writes require the coordinator capability.
+
+Treat redaction as monotonic. Do not try to restore a redacted ID through
+replacement import; create a new reviewed memory only if the user deliberately
+reintroduces safe content.
 
 Never keep known-wrong memory merely because it was previously recalled.
 

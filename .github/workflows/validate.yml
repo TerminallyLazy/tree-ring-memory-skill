@@ -8,25 +8,82 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Validate SKILL.md
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           text = Path("SKILL.md").read_text(encoding="utf-8")
+          readme = Path("README.md").read_text(encoding="utf-8")
           if not text.startswith("---\n"):
               raise SystemExit("SKILL.md must start with YAML frontmatter")
 
           _, frontmatter, body = text.split("---", 2)
-          required = ["name:", "description:"]
+          required = ["name:", "description:", "version:", "tags:", "triggers:"]
           missing = [field for field in required if field not in frontmatter]
           if missing:
               raise SystemExit(f"Missing frontmatter fields: {', '.join(missing)}")
 
+          version_match = re.search(
+              r"^version:\s*(\d+)\.(\d+)\.(\d+)\s*$",
+              frontmatter,
+              flags=re.MULTILINE,
+          )
+          if not version_match:
+              raise SystemExit("SKILL.md must declare a semantic version")
+          version = tuple(int(part) for part in version_match.groups())
+          if version < (0, 13, 0):
+              raise SystemExit("Multi-agent guidance requires skill version >= 0.13.0")
+
           if "# Tree Ring Memory" not in body:
               raise SystemExit("Missing Tree Ring Memory heading")
+
+          required_frontmatter = [
+              '"multi-agent"',
+              '"fan-out"',
+              '"fan-in"',
+              '"idempotency"',
+              '"coordination"',
+              '- "multi-agent memory"',
+          ]
+          missing_frontmatter = [
+              marker for marker in required_frontmatter if marker not in frontmatter
+          ]
+          if missing_frontmatter:
+              raise SystemExit(
+                  "Missing v0.13 tags/triggers: " + ", ".join(missing_frontmatter)
+              )
+
+          required_guidance = {
+              "operation-id idempotency": r"--operation-id",
+              "coordinator capability": r"TREE_RING_COORDINATOR_TOKEN",
+              "protected shared writes":
+                  r"project, global, workflow, session, or other shared/non-agent writes",
+              "protected lifecycle writes":
+                  r"ring changes and supersede/delete/redact lifecycle operations",
+              "protected maintenance": r"maintenance with apply or repair flags",
+              "same-host/local-filesystem boundary":
+                  r"one host using a local\s+filesystem",
+              "schema-v3 old-writer fence":
+                  r"schema v3 fences\s+memory inserts, updates, and deletes from old writers",
+              "mixed-version rejection":
+                  r"all mixed-version\s+operation is unsupported",
+          }
+          missing_guidance = [
+              label
+              for label, pattern in required_guidance.items()
+              if re.search(pattern, body) is None
+          ]
+          if missing_guidance:
+              raise SystemExit(
+                  "Missing v0.13 guidance: " + ", ".join(missing_guidance)
+              )
+
+          if "0.13.0 or newer" not in readme:
+              raise SystemExit("README.md must require Tree Ring CLI 0.13.0 or newer")
 
           blocked = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "sk-", "BEGIN PRIVATE KEY"]
           for marker in blocked:
