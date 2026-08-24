@@ -1,21 +1,11 @@
 ---
 name: tree-ring-memory
 description: Guides AI agents in using Tree Ring Memory for durable recall, project decisions, user preferences, warnings, future seeds, privacy-safe memory capture, and lifecycle-aware forgetting.
-version: 0.14.0
 license: MIT
-tags: ["memory", "agents", "recall", "privacy", "projects", "dox", "revolve", "skills", "cli"]
-triggers:
-  - "remember this"
-  - "recall what we decided"
-  - "what did we learn"
-  - "tree ring memory"
-  - "consolidate memory"
-  - "forget this"
-  - "project memory"
-  - "sync DOX"
-  - "sync Revolve"
-  - "evidence loop"
-  - "multi-agent memory"
+metadata:
+  version: "0.14.1"
+  tags: "memory, agents, recall, privacy, projects, dox, revolve, skills, cli"
+  triggers: "remember this; recall what we decided; what did we learn; tree ring memory; consolidate memory; forget this; project memory; sync DOX; sync Revolve; evidence loop; multi-agent memory"
 ---
 
 # Tree Ring Memory
@@ -392,7 +382,8 @@ optional Coordinated policy:
 
 ```bash
 tree-ring --root .tree-ring policy enable --coordinator release-coordinator
-export TREE_RING_COORDINATOR_TOKEN='<one-time capability printed by enable>'
+# Set and export TREE_RING_COORDINATOR_TOKEN with a history-safe, no-echo prompt
+# supported by your shell, or inject it through an approved secret manager.
 tree-ring --root .tree-ring policy status
 tree-ring --root .tree-ring policy audit --limit 100
 ```
@@ -401,7 +392,9 @@ Enable prints the capability once. Put it only in
 `TREE_RING_COORDINATOR_TOKEN`; never pass it as a CLI flag or place it in a
 memory, log, source ref, transcript, or committed file. Tree Ring stores only a
 hash. `policy status` and `policy audit` are read-only and do not reveal the
-capability. Inject it only into coordinator processes, and launch every ordinary
+capability. Do not paste it into an `export` command; use a history-safe,
+no-echo prompt supported by the current shell or approved secret-manager
+injection. Inject it only into coordinator processes, and launch every ordinary
 worker with `TREE_RING_COORDINATOR_TOKEN` unset so fan-out does not inherit
 coordinator authority.
 
@@ -428,7 +421,8 @@ replace the environment value with the newly printed capability:
 
 ```bash
 tree-ring --root .tree-ring policy rotate --coordinator release-coordinator-next
-export TREE_RING_COORDINATOR_TOKEN='<new one-time capability>'
+# Replace TREE_RING_COORDINATOR_TOKEN through the same history-safe, no-echo
+# input path before using the new capability.
 tree-ring --root .tree-ring policy disable
 unset TREE_RING_COORDINATOR_TOKEN
 ```

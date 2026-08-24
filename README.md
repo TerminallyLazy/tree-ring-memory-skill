@@ -7,6 +7,9 @@ Tree Ring Memory is a framework-agnostic, local-first memory lifecycle for AI
 agents. It helps agents decide when to recall, capture, audit, consolidate, and
 forget project memory without turning memory into an unbounded transcript dump.
 
+Skill package **0.14.1** keeps coordinator capabilities out of shell history
+and requires Tree Ring Memory CLI **0.14.0 or newer**.
+
 ## Install
 
 For Claude Code's personal skills directory:
@@ -89,6 +92,7 @@ memory-lifecycle guidance.
 ## Source Project
 
 - Framework: <https://github.com/TerminallyLazy/Tree-Ring-Memory>
+- Skill release: <https://github.com/TerminallyLazy/tree-ring-memory-skill/releases/tag/v0.14.1>
 - v0.14 release: <https://github.com/TerminallyLazy/Tree-Ring-Memory/releases/tag/v0.14.0>
 - Claude plugin wrapper:
   <https://github.com/TerminallyLazy/tree-ring-memory-claude-plugin>
