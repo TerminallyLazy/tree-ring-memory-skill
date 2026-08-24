@@ -30,15 +30,13 @@ def main() -> None:
     for field in (
         "name:",
         "description:",
-        "version:",
         "license:",
-        "tags:",
-        "triggers:",
+        "metadata:",
     ):
         if field not in frontmatter:
             raise SystemExit(f"missing frontmatter field: {field}")
-    if not re.search(r"^version:\s*0\.14\.0\s*$", frontmatter, re.MULTILINE):
-        raise SystemExit("SKILL.md must declare version 0.14.0")
+    if not re.search(r'^\s+version:\s*"0\.14\.1"\s*$', frontmatter, re.MULTILINE):
+        raise SystemExit("SKILL.md must declare version 0.14.1")
     if "Claude Code" in frontmatter or "Codex" in frontmatter:
         raise SystemExit("portable skill frontmatter must remain provider-neutral")
 
@@ -58,6 +56,7 @@ def main() -> None:
         "needs-user-review",
         "--operation-id",
         "TREE_RING_COORDINATOR_TOKEN",
+        "history-safe, no-echo",
         "same-host local-filesystem processes",
         "schema v3 fences",
         "operation is unsupported",
@@ -75,12 +74,17 @@ def main() -> None:
         "README.md",
         [
             "0.14.0 or newer",
+            "Skill package **0.14.1**",
             "configured-awaiting-proof",
             "needs-project-mount",
             "observed command output",
         ],
     )
     require_markers("PRIVACY.md", ["local SQLite database", "does not receive"])
+    require_markers(
+        "SECURITY.md",
+        ["https://github.com/TerminallyLazy/Tree-Ring-Memory/security/advisories/new"],
+    )
     require_markers("TERMS.md", ["MIT License", "provided without warranty"])
 
     blocked = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "BEGIN PRIVATE KEY"]
@@ -98,6 +102,8 @@ def main() -> None:
             raise SystemExit(f"potential secret marker found: {marker}")
     if "[TODO:" in public_text:
         raise SystemExit("placeholder text remains in the package")
+    if "export TREE_RING_COORDINATOR_TOKEN='<" in public_text:
+        raise SystemExit("token-bearing export example must not appear in the package")
 
     print("Tree Ring Memory portable skill validation passed")
 
