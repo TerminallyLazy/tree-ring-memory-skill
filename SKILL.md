@@ -1,8 +1,8 @@
 ---
 name: tree-ring-memory
 description: Guides AI agents in using Tree Ring Memory for durable recall, project decisions, user preferences, warnings, future seeds, privacy-safe memory capture, and lifecycle-aware forgetting.
-version: 0.13.0
-tags: ["memory", "agents", "recall", "privacy", "projects", "dox", "revolve", "skills", "cli", "multi-agent", "fan-out", "fan-in", "idempotency", "coordination"]
+version: 0.14.0
+tags: ["memory", "agents", "recall", "privacy", "projects", "dox", "revolve", "skills", "cli"]
 triggers:
   - "remember this"
   - "recall what we decided"
@@ -15,9 +15,6 @@ triggers:
   - "sync Revolve"
   - "evidence loop"
   - "multi-agent memory"
-  - "fan-out memory"
-  - "fan-in memory"
-  - "coordinated memory"
 ---
 
 # Tree Ring Memory
@@ -32,6 +29,51 @@ Tree Ring Memory preserves meaningful agent learning like tree rings:
 - durable truths become heartwood
 - speculative future work stays as seeds
 - sensitive data is blocked, redacted, or kept out by default
+
+## Runtime Preflight
+
+Before running a Tree Ring command:
+
+1. Read project-local `.tree-ring/SKILL.md` and `.tree-ring/CLI.md` when they
+   exist. They describe the configured root and exact installed commands.
+2. Confirm that the local runtime is available:
+
+   ```bash
+   tree-ring --version
+   ```
+
+3. This package targets Tree Ring Memory CLI 0.14.0 or newer. If the command is
+   missing or older, do not invent results, edit shell configuration, or install
+   or upgrade software without the user's explicit permission. Explain the
+   limitation and point to the canonical install guide:
+   <https://github.com/TerminallyLazy/Tree-Ring-Memory#install>
+
+If the current host cannot execute a local shell or access project files, use
+this skill only as memory-lifecycle guidance. Do not claim that recall, capture,
+audit, activation, or forgetting occurred unless the corresponding command ran
+and its result was observed.
+
+## Agent Operating Loop
+
+Use this sequence for meaningful project work:
+
+1. Resolve the project root and read its local Tree Ring contract when present.
+2. Run the runtime preflight, then recall narrowly scoped, source-linked memory
+   before making a material decision or repeating a failure-prone workflow.
+3. Treat recalled memory as context, not authority. Recheck facts that may have
+   changed and defer to current source files, tests, policies, and user input.
+4. Do the work. Do not write memory merely because a session is active.
+5. At a natural checkpoint or closeout, capture only durable decisions,
+   corrections, validated lessons, warnings, or future seeds. Never store raw
+   transcripts, secrets, or sensitive data.
+6. Observe the command result and report the actual outcome. A proposed memory,
+   dry run, bridge file, or generated marker is not proof that a durable write,
+   sync, activation, correction, or deletion occurred.
+
+In a Coordinated store, do not attempt persistent writes without the required
+coordinator capability. If the capability is unavailable, provide a concise
+candidate memory for an authorized coordinator instead of claiming it was
+stored.
 
 ## When To Recall
 
@@ -98,6 +140,98 @@ as a pointer only. Read the project-local `.tree-ring/SKILL.md` and
 `.tree-ring/CLI.md` when present so commands match the installed project root.
 Do not assume a global Tree Ring setup applies to the current repo unless the
 user explicitly configured it.
+
+## DOX Contract Flow
+
+When a project uses DOX-style `AGENTS.md` contracts:
+
+1. Read the applicable contract chain from the project root down to the working
+   directory before editing files. More specific child contracts may refine the
+   parent contract.
+2. Treat those current source files as authoritative. A recalled DOX summary is
+   only a navigation and continuity aid; it never overrides the live contract.
+3. Preview the adapter output first with
+   `tree-ring dox sync --source-root <path> --dry-run` and inspect every summary
+   and source reference.
+4. Persist only concise, useful summaries. In a Coordinated store, persistence
+   requires coordinator authority; dry-run discovery does not.
+5. Never use the adapter to rewrite a root or child `AGENTS.md`, copy whole
+   contract trees into memory, or weaken child instructions. Re-run the dry run
+   after a source contract changes and re-read the chain before the next edit.
+
+## Harness Activation
+
+For a new project, begin with the safe, project-local default:
+
+```bash
+tree-ring init
+tree-ring integrations status
+```
+
+Do not ask the user to copy a bridge or run `integrations link` for ordinary
+setup. `init` configures only safe project-local adapter material by creating
+absent final bridge and manifest paths. It never replaces or removes an existing
+entry, including during deactivation; contested entries stay untouched and
+report `needs-user-review`. A bridge, marker, generated skill, or successful
+`init` is not activation proof: `active` requires a fresh, matching receipt from
+a new session's scoped recall and safe context injection.
+Treat `configured-awaiting-proof`, `active-isolated`, `needs-trust`,
+`needs-project-mount`, `needs-plugin`, `needs-user-review`, `unsupported`,
+and `failed` as their exact non-active outcomes. Never say Hermes or another
+unverified runtime is active.
+
+If publication durability becomes indeterminate, do not delete or rewrite the
+published path. Preserve disk material, keep changed harnesses marked
+`needs-user-review` in the returned in-memory manifest, and leave any activation
+manifest already published on disk intact for explicit reconciliation.
+
+Pi trust is the user's decision: report `needs-trust` rather than changing
+global trust. Agent Zero is separate: `tree-ring init` writes only Tree Ring's
+passive Agent Zero binding with `needs-plugin`. The user installs/enables the
+compatible `tree_ring_memory` plugin and selects the mounted project; the plugin
+then owns its absolute, non-project `activation-capability.json` descriptor and
+passes it internally. Only descriptor-scoped plugin status can derive
+`configured-awaiting-proof`, and only its new-session preflight receipt can
+make the runtime `active`.
+
+Never create a generic marker, copy or hand-author that descriptor, set its
+internal transport, modify Agent Zero core, or call a different plugin store
+shared. A missing, invalid, disabled, or release-incompatible descriptor stays
+`needs-plugin`; a different reachable store is `active-isolated`; an
+unavailable root is `needs-project-mount`. A passive binding, source checkout,
+or stale bundled CLI is not installed capability.
+
+Receipts prove a privacy-safe preflight check, not durable memory creation or a
+security boundary. They exclude raw prompts, recalled content, secrets,
+sensitive values, paths, and coordinator capabilities. Shared-store claims are
+limited to same-host local-filesystem processes whose receipts match the
+canonical project `store_id`; they do not apply across hosts or network
+filesystems. For diagnostics use `tree-ring integrations status --verbose`;
+for advanced controlled work use `integrations activate --harness <id>
+--dry-run`, `integrations certify`, or `integrations deactivate --harness
+<id>`.
+
+## Certification Boundary
+
+For an installed Tree Ring runtime, use the self-contained CLI evidence paths:
+
+```bash
+tree-ring integrations certify --source-root .
+tree-ring recall-quality --source-root .
+```
+
+Harness certification is non-mutating and writes JSON/Markdown evidence under
+`target/tree-ring-certification/`; it does not activate a harness or prove that
+an agent used recalled context. Keep receipt-backed status as a separate gate.
+
+`sh scripts/certify-tree-ring.sh` is the full framework release suite. Run it
+only from a canonical Tree Ring Memory source checkout where that file, the Rust
+workspace, `install.sh`, fixtures, and build tooling are all present. Do not
+copy it into another project, download it automatically, or claim full release
+certification from the smaller installed-CLI checks. In the TUI, `/evidence
+refresh` only displays this external source-checkout command; it does not run
+certification. If the script is absent, report that boundary and use the
+self-contained CLI commands above when they fit the user's request.
 
 Evidence outcome mapping:
 
