@@ -36,11 +36,18 @@ brew install tree-ring
 Or use the canonical project install guide:
 <https://github.com/TerminallyLazy/Tree-Ring-Memory#install>
 
-The multi-agent, Coordinated-policy, and schema-v3 guidance in this skill
-requires Tree Ring Memory CLI **0.13.0 or newer**. Before a v0.13 process opens
-an existing store, stop all Tree Ring processes, checkpoint and back up the
-database, and upgrade every CLI, plugin, and bundled worker. Do not use v0.12
-against an upgraded schema-v3 root; all mixed-version operation is unsupported.
+The receipt-backed harness, multi-agent, Coordinated-policy, and schema-v3
+guidance in this skill requires Tree Ring Memory CLI **0.14.0 or newer**. Before
+a current process opens a pre-v0.13 store, stop all Tree Ring processes,
+checkpoint and back up the database, and upgrade every CLI, plugin, and bundled
+worker. Do not use v0.12 against an upgraded schema-v3 root; all mixed-version
+operation is unsupported.
+
+If the CLI is absent or older, the skill reports the limitation. It does not
+install or upgrade software, edit shell configuration, or claim that recall or
+another memory action ran without explicit user permission and observed command
+output. On a host without local shell access, it remains useful as
+memory-lifecycle guidance.
 
 ## What It Teaches
 
@@ -51,6 +58,8 @@ against an upgraded schema-v3 root; all mixed-version operation is unsupported.
 - Use rings deliberately: cambium, outer, inner, heartwood, scar, and seed.
 - Prefer evidence records for evaluated outcomes.
 - Treat source documents as authoritative when memory and source files disagree.
+- Read the applicable DOX-style `AGENTS.md` chain before editing, preview DOX
+  sync output, and never let recalled summaries override or rewrite contracts.
 - Redact, delete, or supersede stale or unsafe memory.
 - Give same-host fan-out workers unique agent profiles and logical operation
   IDs while sharing workflow and attempt-level session IDs.
@@ -68,10 +77,19 @@ against an upgraded schema-v3 root; all mixed-version operation is unsupported.
 - Keep the shared-root claim bounded to concurrent processes on one host and a
   local filesystem; use per-host stores and explicit evidence-preserving fan-in
   across hosts.
+- Distinguish project-local harness configuration from activation, which
+  requires a fresh matching receipt from scoped recall and safe context
+  injection in a new session.
+- Report exact non-active states such as `configured-awaiting-proof`,
+  `needs-trust`, `needs-plugin`, `needs-project-mount`, and `needs-user-review`
+  without modifying trust or manufacturing receipts.
+- Distinguish installed-CLI harness and recall-quality evidence from the full
+  repository-only `scripts/certify-tree-ring.sh` release suite.
 
 ## Source Project
 
 - Framework: <https://github.com/TerminallyLazy/Tree-Ring-Memory>
+- v0.14 release: <https://github.com/TerminallyLazy/Tree-Ring-Memory/releases/tag/v0.14.0>
 - Claude plugin wrapper:
   <https://github.com/TerminallyLazy/tree-ring-memory-claude-plugin>
 - Skill file: [`SKILL.md`](SKILL.md)
@@ -79,3 +97,6 @@ against an upgraded schema-v3 root; all mixed-version operation is unsupported.
 ## License
 
 MIT. See [`LICENSE`](LICENSE).
+
+See [`PRIVACY.md`](PRIVACY.md), [`TERMS.md`](TERMS.md), and
+[`SECURITY.md`](SECURITY.md) for data handling, use terms, and disclosures.
