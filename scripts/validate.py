@@ -27,7 +27,14 @@ def main() -> None:
         raise SystemExit("SKILL.md must start with YAML frontmatter")
 
     _, frontmatter, body = skill.split("---", 2)
-    for field in ("name:", "description:", "version:", "tags:", "triggers:"):
+    for field in (
+        "name:",
+        "description:",
+        "version:",
+        "license:",
+        "tags:",
+        "triggers:",
+    ):
         if field not in frontmatter:
             raise SystemExit(f"missing frontmatter field: {field}")
     if not re.search(r"^version:\s*0\.14\.0\s*$", frontmatter, re.MULTILINE):
