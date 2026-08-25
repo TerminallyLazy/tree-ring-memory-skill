@@ -7,7 +7,7 @@ Tree Ring Memory is a framework-agnostic, local-first memory lifecycle for AI
 agents. It helps agents decide when to recall, capture, audit, consolidate, and
 forget project memory without turning memory into an unbounded transcript dump.
 
-Skill package **0.15.0** adds authorized verified bootstrap and scope-preserving
+Skill package **0.15.1** adds authorized verified bootstrap and scope-preserving
 updates while keeping coordinator capabilities out of shell history. It
 requires Tree Ring Memory CLI **0.15.0 or newer**.
 
@@ -33,9 +33,12 @@ The skill is useful on its own as memory lifecycle guidance. To use the full
 local store, run the verified project-local setup from the actual project root
 after the user has authorized installation:
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/TerminallyLazy/Tree-Ring-Memory/main/install.sh | sh -s -- --project --init --release latest --no-animation
-```
+Download the official version-pinned `v0.15.0/install.sh` to a temporary file,
+verify its SHA-256 is
+`ef0d5eb8f09cbe2e4c3abe80ee9a98a56759c89ad4ddd103d6c68314cd653ade`, inspect
+it, then run `sh <verified-installer-path> --project --init --release latest
+--no-animation` from the project root. Do not pipe a network response directly
+to a shell.
 
 Or use the canonical project install guide:
 <https://github.com/TerminallyLazy/Tree-Ring-Memory#install>
@@ -96,8 +99,8 @@ without a local shell, it remains guidance-only.
 ## Source Project
 
 - Framework: <https://github.com/TerminallyLazy/Tree-Ring-Memory>
-- Skill release: <https://github.com/TerminallyLazy/tree-ring-memory-skill/releases/tag/v0.15.0>
-- v0.15 release: <https://github.com/TerminallyLazy/Tree-Ring-Memory/releases/tag/v0.15.0>
+- Skill release: <https://github.com/TerminallyLazy/tree-ring-memory-skill/releases/tag/v0.15.1>
+- v0.15 release: <https://github.com/TerminallyLazy/Tree-Ring-Memory/releases/tag/v0.15.1>
 - Claude plugin wrapper:
   <https://github.com/TerminallyLazy/tree-ring-memory-claude-plugin>
 - Skill file: [`SKILL.md`](SKILL.md)

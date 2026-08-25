@@ -35,8 +35,8 @@ def main() -> None:
     ):
         if field not in frontmatter:
             raise SystemExit(f"missing frontmatter field: {field}")
-    if not re.search(r'^\s+version:\s*"0\.15\.0"\s*$', frontmatter, re.MULTILINE):
-        raise SystemExit("SKILL.md must declare version 0.15.0")
+    if not re.search(r'^\s+version:\s*"0\.15\.1"\s*$', frontmatter, re.MULTILINE):
+        raise SystemExit("SKILL.md must declare version 0.15.1")
     if "Claude Code" in frontmatter or "Codex" in frontmatter:
         raise SystemExit("portable skill frontmatter must remain provider-neutral")
 
@@ -76,7 +76,7 @@ def main() -> None:
         "README.md",
         [
             "0.15.0 or newer",
-            "Skill package **0.15.0**",
+            "Skill package **0.15.1**",
             "configured-awaiting-proof",
             "needs-project-mount",
             "observed command output",
