@@ -7,8 +7,9 @@ Tree Ring Memory is a framework-agnostic, local-first memory lifecycle for AI
 agents. It helps agents decide when to recall, capture, audit, consolidate, and
 forget project memory without turning memory into an unbounded transcript dump.
 
-Skill package **0.14.1** keeps coordinator capabilities out of shell history
-and requires Tree Ring Memory CLI **0.14.0 or newer**.
+Skill package **0.15.0** adds authorized verified bootstrap and scope-preserving
+updates while keeping coordinator capabilities out of shell history. It
+requires Tree Ring Memory CLI **0.15.0 or newer**.
 
 ## Install
 
@@ -29,28 +30,31 @@ git clone https://github.com/TerminallyLazy/tree-ring-memory-skill \
 ```
 
 The skill is useful on its own as memory lifecycle guidance. To use the full
-local store, install the Tree Ring Memory CLI:
+local store, run the verified project-local setup from the actual project root
+after the user has authorized installation:
 
 ```bash
-brew tap TerminallyLazy/tree-ring
-brew install tree-ring
+curl -fsSL https://raw.githubusercontent.com/TerminallyLazy/Tree-Ring-Memory/main/install.sh | sh -s -- --project --init --release latest --no-animation
 ```
 
 Or use the canonical project install guide:
 <https://github.com/TerminallyLazy/Tree-Ring-Memory#install>
 
 The receipt-backed harness, multi-agent, Coordinated-policy, and schema-v3
-guidance in this skill requires Tree Ring Memory CLI **0.14.0 or newer**. Before
+guidance in this skill requires Tree Ring Memory CLI **0.15.0 or newer**. Before
 a current process opens a pre-v0.13 store, stop all Tree Ring processes,
 checkpoint and back up the database, and upgrade every CLI, plugin, and bundled
 worker. Do not use v0.12 against an upgraded schema-v3 root; all mixed-version
 operation is unsupported.
 
-If the CLI is absent or older, the skill reports the limitation. It does not
-install or upgrade software, edit shell configuration, or claim that recall or
-another memory action ran without explicit user permission and observed command
-output. On a host without local shell access, it remains useful as
-memory-lifecycle guidance.
+If the CLI is absent or older and the user's request already authorizes Tree
+Ring setup, the skill uses the verified project-local bootstrap. Otherwise it
+explains the operation and asks before downloading or changing software. Use
+`tree-ring update --check` for a read-only check and, with update authorization,
+`tree-ring update` to preserve the active scope. It does not edit shell
+configuration, change global scope, or claim that recall or another action ran
+without the required authorization and observed command output. On a host
+without a local shell, it remains guidance-only.
 
 ## What It Teaches
 
@@ -92,8 +96,8 @@ memory-lifecycle guidance.
 ## Source Project
 
 - Framework: <https://github.com/TerminallyLazy/Tree-Ring-Memory>
-- Skill release: <https://github.com/TerminallyLazy/tree-ring-memory-skill/releases/tag/v0.14.1>
-- v0.14 release: <https://github.com/TerminallyLazy/Tree-Ring-Memory/releases/tag/v0.14.0>
+- Skill release: <https://github.com/TerminallyLazy/tree-ring-memory-skill/releases/tag/v0.15.0>
+- v0.15 release: <https://github.com/TerminallyLazy/Tree-Ring-Memory/releases/tag/v0.15.0>
 - Claude plugin wrapper:
   <https://github.com/TerminallyLazy/tree-ring-memory-claude-plugin>
 - Skill file: [`SKILL.md`](SKILL.md)
