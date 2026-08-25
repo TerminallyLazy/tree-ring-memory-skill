@@ -35,20 +35,22 @@ def main() -> None:
     ):
         if field not in frontmatter:
             raise SystemExit(f"missing frontmatter field: {field}")
-    if not re.search(r'^\s+version:\s*"0\.14\.1"\s*$', frontmatter, re.MULTILINE):
-        raise SystemExit("SKILL.md must declare version 0.14.1")
+    if not re.search(r'^\s+version:\s*"0\.15\.0"\s*$', frontmatter, re.MULTILINE):
+        raise SystemExit("SKILL.md must declare version 0.15.0")
     if "Claude Code" in frontmatter or "Codex" in frontmatter:
         raise SystemExit("portable skill frontmatter must remain provider-neutral")
 
     required_guidance = [
-        "Runtime Preflight",
+        "Runtime Bootstrap And Updates",
+        "--project --init --release latest --no-animation",
+        "tree-ring update --check",
         "DOX Contract Flow",
         "tree-ring dox sync --source-root <path> --dry-run",
         "Certification Boundary",
         "tree-ring integrations certify --source-root .",
         "tree-ring recall-quality --source-root .",
         "full framework release suite",
-        "0.14.0 or newer",
+        "0.15.0 or newer",
         "tree-ring integrations status",
         "configured-awaiting-proof",
         "active-isolated",
@@ -68,13 +70,13 @@ def main() -> None:
         if " ".join(marker.split()) not in normalized_body
     ]
     if missing:
-        raise SystemExit("missing v0.14 guidance: " + ", ".join(missing))
+        raise SystemExit("missing v0.15 guidance: " + ", ".join(missing))
 
     require_markers(
         "README.md",
         [
-            "0.14.0 or newer",
-            "Skill package **0.14.1**",
+            "0.15.0 or newer",
+            "Skill package **0.15.0**",
             "configured-awaiting-proof",
             "needs-project-mount",
             "observed command output",
